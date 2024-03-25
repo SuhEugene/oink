@@ -25,16 +25,20 @@ export default function useDiscordAuth() {
       client_id: import.meta.env.VITE_DISCORD_CLIENT_ID,
       response_type: 'code',
       prompt: 'none',
-      scope: ['identify'],
+      scope: ['identify', 'rpc.activities.write'],
     });
 
     const response = await fetch('/api/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ code, instance: discordSdk.instanceId })
-    });
+    }).catch(e => console.error(e));
 
-    const { token, user } = await response.json();
+    if (!response)
+      throw new Error('Auth failed, check console');
+
+    const { token, user, discordToken } = await response.json();
+    discordSdk.commands.authenticate({ access_token: discordToken });
 
     authenticatedUser.value = user;
     localToken.value = token;

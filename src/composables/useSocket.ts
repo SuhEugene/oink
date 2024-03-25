@@ -2,15 +2,23 @@ import io, { Socket } from 'socket.io-client';
 import useDiscordAuth from './useDiscordAuth';
 import { computed, readonly, ref } from 'vue';
 
-type User = {
-  avatar: string
+export type User = {
+  avatar?: string
   id: string
 }
 
+export type FloatingPig = {
+  id: number,  // For vue
+  y: number,   // Percent
+  x: number,   // Percent
+  turn: number // Degrees
+  distance: number // Percent
+}
+
 interface ListenEvents {
-  oink: (data: { user: string, sound: number }) => void
+  oink: (data: { user_id: string, sound: number, pig: FloatingPig }) => void
   user_connected: (user: User) => void
-  user_disconnected: (user: User) => void
+  user_disconnected: (user_id: string) => void
   user_list: (users: User[]) => void
 }
 
@@ -18,7 +26,10 @@ interface EmitEvents {
   oink: () => void
 }
 
-const socket: Socket<ListenEvents, EmitEvents> = io({ autoConnect: false, transports: ['websocket'] });
+const socket: Socket<ListenEvents, EmitEvents> = io({
+  autoConnect: false,
+  path: '/sio/socket.io'
+});
 const connected = ref(false);
 const connecting = ref(false);
 const error = ref<string | null>(null);
@@ -49,7 +60,7 @@ export default function useSocket() {
   onAuthorized(() => {
     if (connected.value || connecting.value) return;
     connecting.value = true;
-    socket.auth = { token: authToken };
+    socket.auth = { token: authToken.value };
     socket.connect();
   });
 

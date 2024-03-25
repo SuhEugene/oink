@@ -14,6 +14,7 @@ export default function useSounds() {
   onMounted(async () => {
     for await (const sound of soundList) {
       const audio = new Audio(sound.default);
+      audio.volume = 0.5;
       audio.addEventListener('loadeddata', () => { loadedSounds.value++ });
       sounds.push(audio);
     }
