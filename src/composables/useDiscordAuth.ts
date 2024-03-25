@@ -1,14 +1,19 @@
-import type { DiscordSDK } from "@discord/embedded-app-sdk";
 import { onMounted, readonly, ref } from "vue";
 import useDiscordSDK from "./useDiscordSDK";
 
-type User = Awaited<ReturnType<DiscordSDK['commands']['authenticate']>>['user'];
+type User = {
+  id: string
+  username: string
+  avatar?: string,
+  global_name?: string
+};
 type Callback = () => any;
 
 
 // TODO: independent discordSDK
 const loading = ref<boolean>(false);
 const authenticatedUser = ref<User | null>(null);
+const localToken = ref<string | null>(null);
 const authError = ref<string | null>(null);
 const callbacks: Callback[] = [];
 
@@ -18,24 +23,21 @@ export default function useDiscordAuth() {
   async function authenticate() {
     const { code } = await discordSdk.commands.authorize({
       client_id: import.meta.env.VITE_DISCORD_CLIENT_ID,
-      response_type: "code",
-      prompt: "none",
-      scope: ["identify"],
+      response_type: 'code',
+      prompt: 'none',
+      scope: ['identify'],
     });
 
-    const response = await fetch("/api/token", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+    const response = await fetch('/api/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ code })
     });
 
-    const { access_token } = await response.json();
-    const auth = await discordSdk.commands.authenticate({ access_token });
+    const { token, user } = await response.json();
 
-    if (auth === null)
-      throw new Error("Authorization failed");
-
-    authenticatedUser.value = auth.user;
+    authenticatedUser.value = user;
+    localToken.value = token;
 
     for (const callback of callbacks)
       callback();
@@ -58,6 +60,7 @@ export default function useDiscordAuth() {
 
   return {
     user: readonly(authenticatedUser),
+    authToken: readonly(localToken),
     error: readonly(authError),
     loading: readonly(loading),
     onAuthorized

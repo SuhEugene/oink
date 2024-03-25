@@ -10,6 +10,14 @@ const { socket, connected, error: socketError } = useSocket();
 
 const anyError = computed(() => discordAuthError.value || socketError.value);
 
+socket.on('oink', () => {
+})
+
+function doOink() {
+  sounds[0].play();
+  socket.emit('oink');
+}
+
 </script>
 
 <template>
@@ -26,7 +34,7 @@ const anyError = computed(() => discordAuthError.value || socketError.value);
         <p>{{ anyError }}</p>
       </div>
       <div v-else class="users">
-        <button @click.prevent="sounds[0].play();">Oink</button>
+        <button @click.prevent="doOink()">Oink</button>
       </div>
     </Transition>
   </main>

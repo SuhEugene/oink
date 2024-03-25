@@ -10,7 +10,8 @@ dotenv.config({ path: '../.env' });
 const {
   VITE_DISCORD_CLIENT_ID, //
   DISCORD_CLIENT_SECRET,
-  JWT_SECRET
+  JWT_SECRET,
+  OINK_SOUNDS_AMOUNT
 } = process.env;
 
 const app = express();
@@ -21,7 +22,12 @@ const port = 3001;
 app.use(express.json());
 
 app.post('/token', async (req, res) => {
-  const response = await fetch(`https://discord.com/api/oauth2/token`, {
+  if (!req.body.code) return res.status(400).json({ message: 'No code provided' });
+
+  if (!req.body.instance || typeof req.body.instance !== 'string')
+    return res.status(400).json({ message: 'No instance provided' });
+
+  const tokenResponse = await fetch('https://discord.com/api/oauth2/token', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded'
@@ -34,27 +40,51 @@ app.post('/token', async (req, res) => {
     })
   });
 
-  jwt.sign();
+  const { token_type, access_token } = await tokenResponse.json();
 
-  const { access_token } = await response.json();
-  res.send({ access_token });
+  const userResponse = await fetch('https://discord.com/api/users/@me', {
+    method: 'GET',
+    headers: { Authorization: `${token_type} ${access_token}` }
+  });
+
+  const userData = await userResponse.json();
+  const user = {
+    id: userData.id,
+    username: userData.username,
+    global_name: userData.global_name,
+    avatar: userData.avatar
+  };
+
+  const token = jwt.sign({ user, instance: req.body.instance });
+
+  res.send({ token, user });
 });
 
-io.use((socket, next) => {
-  const { token } = socket.handshake.auth;
-  if (!token) return next(new Error('No token provided!'));
+// io.use((socket, next) => {
+//   // const { token } = socket.handshake.auth;
+//   // if (!token) return next(new Error('No token provided!'));
 
-  try {
-    jwt.verify(token, JWT_SECRET);
-  } catch (e) {
-    return next(new Error('Invalid token!'));
-  }
+//   // try {
+//   //   const data = jwt.decode(token, JWT_SECRET, { json: true });
+//   //   if (!data) return new Error('Invalid token data!');
+//   //   socket.data = data;
+//   // } catch (e) {
+//   //   return next(new Error('Invalid token!'));
+//   // }
 
-  next();
-});
+//   next();
+// });
 
 io.on('connection', (socket) => {
-  socket.on('oink', () => {});
+  console.log('Socket.IO client connected', socket.id);
+  socket.on('oink', () => {
+    console.log('Socket data', socket.data);
+    // io.in('a').emit('oink', {
+    //   user: '123',
+    //   sound: Math.floor(Math.random() * OINK_SOUNDS_AMOUNT)
+    // });
+  });
+  socket.on('disconnect', () => console.log('Socket.IO client disconnected', socket.id));
 });
 
 server.listen(port, () => {

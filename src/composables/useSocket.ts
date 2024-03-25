@@ -1,6 +1,6 @@
 import io, { Socket } from 'socket.io-client';
 import useDiscordAuth from './useDiscordAuth';
-import { readonly, ref } from 'vue';
+import { computed, readonly, ref } from 'vue';
 
 type User = {
   avatar: string
@@ -8,7 +8,7 @@ type User = {
 }
 
 interface ListenEvents {
-  oink: (user: User) => void
+  oink: (data: { user: string, sound: number }) => void
   user_connected: (user: User) => void
   user_disconnected: (user: User) => void
   user_list: (users: User[]) => void
@@ -32,23 +32,24 @@ socket.on('connect', () => {
 socket.on('connect_error', (err) => {
   error.value = err.message;
   connecting.value = false
+  console.error('Connection error:', err);
 });
 
 socket.on('disconnect', (reason) => {
   if (reason !== "io server disconnect")
     error.value = reason;
 
+  console.error('Disconnected:', reason);
   connected.value = false;
 });
 
 export default function useSocket() {
-  const { onAuthorized } = useDiscordAuth();
+  const { onAuthorized, authToken } = useDiscordAuth();
 
   onAuthorized(() => {
     if (connected.value || connecting.value) return;
     connecting.value = true;
-    socket.auth = {
-    }
+    socket.auth = { token: authToken };
     socket.connect();
   });
 
@@ -56,6 +57,6 @@ export default function useSocket() {
     socket,
     connected: readonly(connected),
     connecting: readonly(connecting),
-    error: readonly(error)
+    error: computed(() => `Socket.IO error: ${error.value}`)
   };
 }
