@@ -3,14 +3,13 @@ import useSounds from './composables/useSounds';
 import useDiscordAuth from './composables/useDiscordAuth';
 import useSocket from './composables/useSocket';
 import type { User, FloatingPig } from './composables/useSocket';
-import { computed, onMounted, ref, triggerRef } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import useDiscordSDK from './composables/useDiscordSDK';
-import { Events, RPCCloseCodes } from '@discord/embedded-app-sdk';
 
 let playingSince = Date.now();
 let oinks = 0;
 const { sounds, loadedSounds, soundsToLoad } = useSounds();
-const { user, loading: authorizing, error: discordAuthError, onAuthorized } = useDiscordAuth();
+const { user, error: discordAuthError, onAuthorized } = useDiscordAuth();
 const { socket, connected, error: socketError } = useSocket();
 
 const anyError = computed(() => discordAuthError.value || socketError.value);
