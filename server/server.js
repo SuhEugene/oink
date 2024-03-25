@@ -17,11 +17,11 @@ const {
 const app = express();
 const server = createServer(app);
 const io = new Server(server);
-const port = 3001;
+const port = 51533;
 
 app.use(express.json());
 
-app.post('/token', async (req, res) => {
+app.post('/api/token', async (req, res) => {
   if (!req.body.code) return res.status(400).json({ message: 'No code provided' });
 
   if (!req.body.instance || typeof req.body.instance !== 'string')
@@ -55,8 +55,7 @@ app.post('/token', async (req, res) => {
     avatar: userData.avatar
   };
 
-  const token = jwt.sign({ user, instance: req.body.instance });
-
+  const token = jwt.sign({ user, instance: req.body.instance }, JWT_SECRET);
   res.send({ token, user });
 });
 

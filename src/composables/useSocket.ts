@@ -18,7 +18,7 @@ interface EmitEvents {
   oink: () => void
 }
 
-const socket: Socket<ListenEvents, EmitEvents> = io({ autoConnect: false });
+const socket: Socket<ListenEvents, EmitEvents> = io({ autoConnect: false, transports: ['websocket'] });
 const connected = ref(false);
 const connecting = ref(false);
 const error = ref<string | null>(null);
@@ -57,6 +57,6 @@ export default function useSocket() {
     socket,
     connected: readonly(connected),
     connecting: readonly(connecting),
-    error: computed(() => `Socket.IO error: ${error.value}`)
+    error: computed(() => error.value && `Socket.IO error: ${error.value}`)
   };
 }

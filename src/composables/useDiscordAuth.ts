@@ -31,7 +31,7 @@ export default function useDiscordAuth() {
     const response = await fetch('/api/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code })
+      body: JSON.stringify({ code, instance: discordSdk.instanceId })
     });
 
     const { token, user } = await response.json();

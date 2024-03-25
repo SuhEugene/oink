@@ -18,20 +18,33 @@ function doOink() {
   socket.emit('oink');
 }
 
+const loadingParts = computed(() => {
+  const parts = [
+    loadedSounds.value,
+    user.value,
+    connected.value
+  ];
+
+  parts.reduce((v1, v2) => v1);
+
+  return 1;
+
+})
+
 </script>
 
 <template>
   <main>
     <Transition mode="out-in">
-      <div v-if="(loadedSounds < soundsToLoad) || authorizing" class="splash">
+      <div v-if="anyError" class="splash">
+        <h2 class="splash-title">Error!</h2>
+        <p>{{ anyError }}</p>
+      </div>
+      <div v-else-if="(loadedSounds < soundsToLoad) || authorizing" class="splash">
         <h2 class="splash-title">Loading...</h2>
         <div class="loading">
           <div class="loading-indicator" :style="{ width: `${loadedSounds / soundsToLoad * 100}%` }"></div>
         </div>
-      </div>
-      <div v-else-if="anyError" class="splash">
-        <h2 class="splash-title">Error!</h2>
-        <p>{{ anyError }}</p>
       </div>
       <div v-else class="users">
         <button @click.prevent="doOink()">Oink</button>
