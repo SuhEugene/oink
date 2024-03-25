@@ -84,8 +84,6 @@ const loadingParts = computed(() => {
   };
 });
 
-const speakingUser = ref<string[]>([]);
-
 const { discordSdk } = useDiscordSDK();
 
 onMounted(async () => {
