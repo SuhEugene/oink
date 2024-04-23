@@ -19,7 +19,7 @@ const proxify = (normalUrl, proxyUrl) => (!PROXY_PASS ? normalUrl : proxyUrl);
 
 const app = express();
 const server = createServer(app);
-const io = new Server(server, { path: proxify('/sio/socket.io', '/socket.io') });
+const io = new Server(server, { path: '/socket.io' });
 const port = 51533;
 
 app.use(express.json());
