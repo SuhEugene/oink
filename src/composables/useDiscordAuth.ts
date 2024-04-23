@@ -10,7 +10,6 @@ type User = {
 type Callback = () => any;
 
 
-// TODO: independent discordSDK
 const loading = ref<boolean>(false);
 const authenticatedUser = ref<User | null>(null);
 const localToken = ref<string | null>(null);
