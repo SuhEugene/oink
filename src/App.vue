@@ -8,7 +8,7 @@ import useDiscordSDK from './composables/useDiscordSDK';
 
 let playingSince = Date.now();
 let oinks = 0;
-const { sounds, loadedSounds, soundsToLoad } = useSounds();
+const { playSound, loadedSounds, soundsToLoad } = useSounds();
 const { user, error: discordAuthError, onAuthorized } = useDiscordAuth();
 const { socket, connected, error: socketError } = useSocket();
 
@@ -25,9 +25,7 @@ socket.on('disconnect', () => allUsers.value = []);
 const floatingPigs = ref<Record<string, FloatingPig[]>>({});
 
 socket.on('oink', ({ user_id, sound, pig }) => {
-  if (!sounds[sound].paused && sounds[sound].currentTime >= 0.1)
-    sounds[sound].currentTime = 0;
-
+  playSound(sound);
 
   if (!floatingPigs.value[user_id])
     floatingPigs.value[user_id] = [];
@@ -39,8 +37,6 @@ socket.on('oink', ({ user_id, sound, pig }) => {
     if (index === -1) return;
     floatingPigs.value[user_id].splice(index, 1);
   }, 3000)
-
-  sounds[sound].play();
 })
 
 function setActivity() {
