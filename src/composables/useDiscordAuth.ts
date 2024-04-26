@@ -37,7 +37,7 @@ export default function useDiscordAuth() {
       throw new Error('Auth failed, check console');
 
     const { token, user, discordToken } = await response.json();
-    discordSdk.commands.authenticate({ access_token: discordToken });
+    await discordSdk.commands.authenticate({ access_token: discordToken });
 
     authenticatedUser.value = user;
     localToken.value = token;
