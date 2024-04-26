@@ -200,25 +200,37 @@ onUnmounted(() => {
   position: relative;
 }
 
-.user__avatar {
-  --default-avatar-shadow: 6px 6px 16px rgba(0, 0, 0, .18);
-  --speaking-border-width: 2px;
+.user::before {
+  --speaking-border-width: 0px;
 
+  content: '';
+  position: absolute;
+  top: 0px;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+  border-radius: 50%;
+  box-shadow:
+    inset 0 0 0 var(--speaking-border-width) #23A559,
+    inset 0 0 0 calc(var(--speaking-border-width) * 2) var(--color-background);
+  transition: box-shadow 0.13s;
+
+  z-index: 2;
+}
+
+.user.user--speaking::before {
+  --speaking-border-width: 3px;
+}
+
+.user__avatar {
   width: var(--avatar-size);
   height: var(--avatar-size);
   border-radius: 50%;
-  box-shadow: var(--default-avatar-shadow);
+  box-shadow: 6px 6px 16px rgba(0, 0, 0, .18);
 }
 
 .user__avatar--none {
   filter: grayscale(1);
-}
-
-.user--speaking .user__avatar {
-  box-shadow:
-    var(--default-avatar-shadow),
-    inset 0 0 0 var(--speaking-border-width) #23A559,
-    inset 0 0 0 calc(var(--speaking-border-width) * 2) var(--color-background);
 }
 
 .floating-pig {
