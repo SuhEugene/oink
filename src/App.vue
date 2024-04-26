@@ -202,6 +202,7 @@ onUnmounted(() => {
 
 .user::before {
   --speaking-border-width: 0px;
+  --speaking-border-space-width: 0px;
 
   content: '';
   position: absolute;
@@ -212,7 +213,7 @@ onUnmounted(() => {
   border-radius: 50%;
   box-shadow:
     inset 0 0 0 var(--speaking-border-width) #23A559,
-    inset 0 0 0 calc(var(--speaking-border-width) * 2) var(--color-background);
+    inset 0 0 0 var(--speaking-border-space-width) var(--color-background);
   transition: box-shadow 0.13s;
 
   z-index: 2;
@@ -220,6 +221,7 @@ onUnmounted(() => {
 
 .user.user--speaking::before {
   --speaking-border-width: 3px;
+  --speaking-border-space-width: 2px;
 }
 
 .user__avatar {
@@ -314,10 +316,14 @@ onUnmounted(() => {
 }
 
 @media (max-height: 420px) {
-
   .users {
     --avatar-size: 64px;
     --gap-size: 12px;
+  }
+
+  .user.user--speaking::before {
+    --speaking-border-width: 2px;
+    --speaking-border-space-width: 1px;
   }
 }
 
