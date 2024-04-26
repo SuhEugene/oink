@@ -24,7 +24,7 @@ export default function useDiscordAuth() {
       client_id: import.meta.env.VITE_DISCORD_CLIENT_ID,
       response_type: 'code',
       prompt: 'none',
-      scope: ['identify', 'rpc.activities.write'],
+      scope: ['identify', 'rpc.activities.write', 'rpc.voice.read'],
     });
 
     const response = await fetch('/api/token', {

@@ -3,7 +3,7 @@ import useSounds from './composables/useSounds';
 import useDiscordAuth from './composables/useDiscordAuth';
 import useSocket from './composables/useSocket';
 import type { User, FloatingPig } from './composables/useSocket';
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import useDiscordSDK from './composables/useDiscordSDK';
 
 let playingSince = Date.now();
@@ -81,11 +81,28 @@ const loadingParts = computed(() => {
 });
 
 const { discordSdk } = useDiscordSDK();
+const usersSpeaking = ref<string[]>([]);
+
+type DiscordSpeakingUser = { user_id: string };
+const addUserSpeaking = ({ user_id }: DiscordSpeakingUser) => usersSpeaking.value.push(user_id);
+const removeUserSpeaking = ({ user_id }: DiscordSpeakingUser) => {
+  const index = usersSpeaking.value.indexOf(user_id);
+  if (index === -1) return;
+  usersSpeaking.value.splice(index, 1);
+}
 
 onMounted(async () => {
   await discordSdk.ready();
   playingSince = Date.now();
-})
+
+  discordSdk.subscribe('SPEAKING_START', addUserSpeaking, { channel_id: discordSdk.channelId });
+  discordSdk.subscribe('SPEAKING_STOP', removeUserSpeaking, { channel_id: discordSdk.channelId });
+});
+
+onUnmounted(() => {
+  discordSdk.unsubscribe('SPEAKING_START', addUserSpeaking, { channel_id: discordSdk.channelId });
+  discordSdk.unsubscribe('SPEAKING_STOP', removeUserSpeaking, { channel_id: discordSdk.channelId });
+});
 
 
 </script>
@@ -107,7 +124,8 @@ onMounted(async () => {
       </div>
       <div v-else class="oink">
         <div class="users">
-          <div v-for="user in allUsers" :key="user.id" class="user">
+          <div v-for="user in allUsers" :key="user.id" class="user"
+            :class="{ 'user--speaking': usersSpeaking.includes(user.id) }">
             <img v-if="user.avatar" class="user__avatar"
               :src="`https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.webp?size=128`" draggable="false">
             <img v-else class="user__avatar user__avatar--none" src="@/assets/images/pig92.png" alt="">
@@ -180,14 +198,24 @@ onMounted(async () => {
 }
 
 .user__avatar {
+  --default-avatar-shadow: 6px 6px 16px rgba(0, 0, 0, .18);
+  --speaking-border-width: 2px;
+
   width: var(--avatar-size);
   height: var(--avatar-size);
   border-radius: 50%;
-  box-shadow: 6px 6px 16px rgba(0, 0, 0, .18);
+  box-shadow: var(--default-avatar-shadow);
 }
 
 .user__avatar--none {
   filter: grayscale(1);
+}
+
+.user--speaking .user__avatar {
+  box-shadow:
+    var(--default-avatar-shadow),
+    inset 0 0 0 var(--speaking-border-width) #23A559,
+    inset 0 0 0 calc(var(--speaking-border-width) * 2) var(--color-background);
 }
 
 .floating-pig {
