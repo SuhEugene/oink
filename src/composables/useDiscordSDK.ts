@@ -6,7 +6,6 @@ const ready = ref(false);
 
 export default function useDiscordSDK() {
   const params = new URLSearchParams(window.location.search);
-  console.log(params);
 
   if (discordSdk === null)
     discordSdk = params.get('frame_id')
