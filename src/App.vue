@@ -81,6 +81,13 @@ const loadingParts = computed(() => {
 });
 
 const { discordSdk } = useDiscordSDK();
+
+onMounted(async () => {
+  await discordSdk.ready();
+  playingSince = Date.now();
+});
+
+
 const usersSpeaking = ref<string[]>([]);
 
 type DiscordSpeakingUser = { user_id: string };
@@ -91,10 +98,7 @@ const removeUserSpeaking = ({ user_id }: DiscordSpeakingUser) => {
   usersSpeaking.value.splice(index, 1);
 }
 
-onMounted(async () => {
-  await discordSdk.ready();
-  playingSince = Date.now();
-
+onAuthorized(() => {
   discordSdk.subscribe('SPEAKING_START', addUserSpeaking, { channel_id: discordSdk.channelId });
   discordSdk.subscribe('SPEAKING_STOP', removeUserSpeaking, { channel_id: discordSdk.channelId });
 });
@@ -103,7 +107,6 @@ onUnmounted(() => {
   discordSdk.unsubscribe('SPEAKING_START', addUserSpeaking, { channel_id: discordSdk.channelId });
   discordSdk.unsubscribe('SPEAKING_STOP', removeUserSpeaking, { channel_id: discordSdk.channelId });
 });
-
 
 </script>
 
