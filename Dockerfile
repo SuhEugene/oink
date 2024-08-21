@@ -14,4 +14,4 @@ COPY . .
 RUN pnpm build
 
 FROM nginx:1.27.1-alpine AS deploy
-COPY --from=build ./dist /usr/share/nginx/html
+COPY --from=build /app/dist /usr/share/nginx/html
