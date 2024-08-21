@@ -11,7 +11,6 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 
 FROM deps AS deploy
 WORKDIR /app/server
-COPY ../.env ../
 COPY . .
 
 EXPOSE 8081
