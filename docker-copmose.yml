@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  frontend:
+    build: .
+  backend:
+    build:
+      context: ./api
+    restart: unless-stopped
+    ports:
+      - '51500:8081'
