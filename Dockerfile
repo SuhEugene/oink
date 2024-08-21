@@ -11,5 +11,7 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 
 FROM deps AS build
 COPY . .
-VOLUME ./dist ./dist
 RUN pnpm build
+
+FROM nginx:1.27.1-alpine AS deploy
+COPY --from=build ./dist /usr/share/nginx/html
