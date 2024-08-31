@@ -27,7 +27,7 @@ export default function useDiscordAuth() {
       scope: ['identify', 'rpc.activities.write', 'rpc.voice.read'],
     });
 
-    const response = await fetch('/api/token', {
+    const response = await fetch('/.proxy/api/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ code, instance: discordSdk.instanceId })
