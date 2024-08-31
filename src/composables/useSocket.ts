@@ -28,7 +28,7 @@ interface EmitEvents {
 
 const socket: Socket<ListenEvents, EmitEvents> = io({
   autoConnect: false,
-  path: '/sio/socket.io'
+  path: '/.proxy/sio/socket.io'
 });
 const connected = ref(false);
 const connecting = ref(false);
